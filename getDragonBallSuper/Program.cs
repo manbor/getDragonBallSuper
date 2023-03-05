@@ -20,7 +20,16 @@ for (int volume = 1; volume <= 83; volume++)
     HtmlDocument doc = new HtmlDocument();
     doc.LoadHtml(html);
 
-    HtmlNodeCollection figureOfImgs = doc.DocumentNode.SelectNodes("//figure[@class='wp-block-image']//img");
+    HtmlNodeCollection imgs = doc.DocumentNode.SelectNodes("//figure[@class='wp-block-image']//img");
 
+    for (int i = 0; i < imgs.Count; i++) { 
+        var src = 
+            (
+                from att in imgs.ElementAt(i).GetAttributes()
+                where att.Name.Equals("src")
+                select att.Value
+            ).First()
+                ;
 
+    }
 }
