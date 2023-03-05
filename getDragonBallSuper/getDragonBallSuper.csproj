@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <Folder Include="download\" />
+    <Folder Include="cbr\" />
   </ItemGroup>
 
 </Project>
