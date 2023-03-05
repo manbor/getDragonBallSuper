@@ -42,10 +42,17 @@ catch (Exception e)
 for (int volume = 1; volume <= 83; volume++)
 {
     string html;
-    string url = $"https://planetadragonball.com/dragon-ball-super-manga-{volume}-espanol/";
+    string url;
     string baseName = "dbs " + volume.ToString().PadLeft(3, '0');
     string comicImgsDir = comicImgsDirBase + baseName;
 
+    if (volume > 0 && volume <= 58)
+    {
+        url = $"https://planetadragonball.com/dragon-ball-super-manga-{volume}-espanol/";
+    }
+    else {
+        url = $"https://radardeldragon.com/dragon-ball-super-manga-{volume}-espanol/";
+    }
 
     // getting HTML 
     using (var client = new WebClient())
@@ -54,8 +61,16 @@ for (int volume = 1; volume <= 83; volume++)
     }
     HtmlDocument doc = new HtmlDocument();
     doc.LoadHtml(html);
-    HtmlNodeCollection imgs = doc.DocumentNode.SelectNodes("//figure[@class='wp-block-image']//img");
 
+    HtmlNodeCollection imgs;
+    
+    imgs = doc.DocumentNode.SelectNodes("//figure[@class='wp-block-image']//img");
+
+    if (imgs == null || imgs.Count == 0) {
+        imgs = doc.DocumentNode.SelectNodes("//div[@class='entry-content clear']//img");
+    }
+
+    // create imgs folders
     try
     {
         Directory.CreateDirectory(comicImgsDir);
