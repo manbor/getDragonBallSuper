@@ -8,6 +8,37 @@ string comicImgsDirBase = @"C:\Users\manue\source\repos\getDragonBallSuper\getDr
 string zipDir = @"C:\Users\manue\source\repos\getDragonBallSuper\getDragonBallSuper\cbr\";
 
 
+// creating download directory 
+try
+{
+    if (Directory.Exists(comicImgsDirBase))
+    {
+        Directory.Delete(comicImgsDirBase, true);
+    }
+    Directory.CreateDirectory(comicImgsDirBase);
+}
+catch (Exception e)
+{
+    Console.WriteLine("The process failed: {0}", e.ToString());
+    System.Environment.Exit(1);
+}
+
+// creating cbr directory 
+try
+{
+    if (Directory.Exists(zipDir))
+    {
+        Directory.Delete(zipDir, true);
+    }
+    Directory.CreateDirectory(zipDir);
+}
+catch (Exception e)
+{
+    Console.WriteLine("The process failed: {0}", e.ToString());
+    System.Environment.Exit(1);
+}
+
+
 for (int volume = 1; volume <= 83; volume++)
 {
     string html;
@@ -25,14 +56,8 @@ for (int volume = 1; volume <= 83; volume++)
     doc.LoadHtml(html);
     HtmlNodeCollection imgs = doc.DocumentNode.SelectNodes("//figure[@class='wp-block-image']//img");
 
-
-    // creating directory 
     try
     {
-        if (Directory.Exists(comicImgsDir))
-        {
-            Directory.Delete(comicImgsDir, true);
-        }
         Directory.CreateDirectory(comicImgsDir);
     }
     catch (Exception e)
@@ -40,7 +65,6 @@ for (int volume = 1; volume <= 83; volume++)
         Console.WriteLine("The process failed: {0}", e.ToString());
         System.Environment.Exit(1);
     }
-
 
     // download imgs
     for (int i = 0; i < imgs.Count; i++) {
@@ -62,23 +86,6 @@ for (int volume = 1; volume <= 83; volume++)
         }
     }
     
-
-    // creating cbr directory 
-    try
-    {
-        if (Directory.Exists(zipDir))
-        {
-            Directory.Delete(zipDir, true);
-        }
-        Directory.CreateDirectory(zipDir);
-    }
-    catch (Exception e)
-    {
-        Console.WriteLine("The process failed: {0}", e.ToString());
-        System.Environment.Exit(1);
-    }
-
-
     //compress dir
     string cbrPath = zipDir + baseName + ".cbr";
     Console.WriteLine("creating ".PadRight(15) + cbrPath);
