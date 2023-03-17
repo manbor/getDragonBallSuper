@@ -4,7 +4,7 @@ using System.Text;
 using System.IO.Compression;
 
 
-int startingVolume = 84;
+int startingVolume = 1;
 
 string comicImgsDirBase = @"C:\Users\manue\source\repos\getDragonBallSuper\getDragonBallSuper\download\";
 string zipDir = @"C:\Users\manue\source\repos\getDragonBallSuper\getDragonBallSuper\cbr\";
@@ -61,12 +61,10 @@ try
         }
 
         // getting HTML 
-
         using (var client = new WebClient())
         {
             html = client.DownloadString(url);
         }
-
 
         HtmlDocument doc = new HtmlDocument();
         doc.LoadHtml(html);
@@ -124,7 +122,6 @@ try
 catch (System.Net.WebException ex)
 {
     Console.WriteLine(ex);
-    System.Environment.Exit(1);
 }
 finally
 {
