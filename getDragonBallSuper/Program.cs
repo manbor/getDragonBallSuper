@@ -4,9 +4,10 @@ using System.Text;
 using System.IO.Compression;
 
 
+int startingVolume = 84;
+
 string comicImgsDirBase = @"C:\Users\manue\source\repos\getDragonBallSuper\getDragonBallSuper\download\";
 string zipDir = @"C:\Users\manue\source\repos\getDragonBallSuper\getDragonBallSuper\cbr\";
-
 
 // creating download directory 
 try
@@ -39,71 +40,93 @@ catch (Exception e)
 }
 
 
-for (int volume = 1; volume <= 83; volume++)
+try
 {
-    string html;
-    string url;
-    string baseName = "dbs " + volume.ToString().PadLeft(3, '0');
-    string comicImgsDir = comicImgsDirBase + baseName;
+    int volume = startingVolume < 1 ? 1 : startingVolume;
 
-    if (volume > 0 && volume <= 58)
+    while(true)
     {
-        url = $"https://planetadragonball.com/dragon-ball-super-manga-{volume}-espanol/";
-    }
-    else {
-        url = $"https://radardeldragon.com/dragon-ball-super-manga-{volume}-espanol/";
-    }
+        string html;
+        string url;
+        string baseName = "dbs " + volume.ToString().PadLeft(3, '0');
+        string comicImgsDir = comicImgsDirBase + baseName;
 
-    // getting HTML 
-    using (var client = new WebClient())
-    {
-        html = client.DownloadString(url);
-    }
-    HtmlDocument doc = new HtmlDocument();
-    doc.LoadHtml(html);
-
-    HtmlNodeCollection imgs;
-    
-    imgs = doc.DocumentNode.SelectNodes("//figure[@class='wp-block-image']//img");
-
-    if (imgs == null || imgs.Count == 0) {
-        imgs = doc.DocumentNode.SelectNodes("//div[@class='entry-content clear']//img");
-    }
-
-    // create imgs folders
-    try
-    {
-        Directory.CreateDirectory(comicImgsDir);
-    }
-    catch (Exception e)
-    {
-        Console.WriteLine("The process failed: {0}", e.ToString());
-        System.Environment.Exit(1);
-    }
-
-    // download imgs
-    for (int i = 0; i < imgs.Count; i++) {
-        string imgNameWithPah = comicImgsDir + "\\img_" + i.ToString().PadLeft(3, '0') + ".jpeg";
-
-        var src = 
-            (
-                from att in imgs.ElementAt(i).GetAttributes()
-                where att.Name.Equals("src")
-                select att.Value
-            ).First()
-                ;
-
-        Console.WriteLine("getting ".PadRight(15) + imgNameWithPah);
-
-        using (WebClient client = new WebClient())
+        if (volume > 0 && volume <= 58)
         {
-            client.DownloadFile(new Uri(src), imgNameWithPah);
+            url = $"https://planetadragonball.com/dragon-ball-super-manga-{volume}-espanol/";
         }
-    }
-    
-    //compress dir
-    string cbrPath = zipDir + baseName + ".cbr";
-    Console.WriteLine("creating ".PadRight(15) + cbrPath);
-    ZipFile.CreateFromDirectory(comicImgsDir, cbrPath);
+        else
+        {
+            url = $"https://radardeldragon.com/dragon-ball-super-manga-{volume}-espanol/";
+        }
 
-} 
+        // getting HTML 
+
+        using (var client = new WebClient())
+        {
+            html = client.DownloadString(url);
+        }
+
+
+        HtmlDocument doc = new HtmlDocument();
+        doc.LoadHtml(html);
+
+        HtmlNodeCollection imgs;
+
+        imgs = doc.DocumentNode.SelectNodes("//figure[@class='wp-block-image']//img");
+
+        if (imgs == null || imgs.Count == 0)
+        {
+            imgs = doc.DocumentNode.SelectNodes("//div[@class='entry-content clear']//img");
+        }
+
+        // create imgs folders
+        try
+        {
+            Directory.CreateDirectory(comicImgsDir);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine("The process failed: {0}", e.ToString());
+            System.Environment.Exit(1);
+        }
+
+        // download imgs
+        for (int i = 0; i < imgs.Count; i++)
+        {
+            string imgNameWithPah = comicImgsDir + "\\img_" + i.ToString().PadLeft(3, '0') + ".jpeg";
+
+            var src =
+                (
+                    from att in imgs.ElementAt(i).GetAttributes()
+                    where att.Name.Equals("src")
+                    select att.Value
+                ).First()
+                    ;
+
+            Console.WriteLine("getting ".PadRight(15) + imgNameWithPah);
+
+            using (WebClient client = new WebClient())
+            {
+                client.DownloadFile(new Uri(src), imgNameWithPah);
+            }
+        }
+
+        //compress dir
+        string cbrPath = zipDir + baseName + ".cbr";
+        Console.WriteLine("creating ".PadRight(15) + cbrPath);
+        ZipFile.CreateFromDirectory(comicImgsDir, cbrPath);
+
+        volume++;
+
+    }
+}
+catch (System.Net.WebException ex)
+{
+    Console.WriteLine(ex);
+    System.Environment.Exit(1);
+}
+finally
+{
+    Console.WriteLine("This is all");
+}
