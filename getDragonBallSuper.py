@@ -20,38 +20,22 @@ cbr_dir = os.path.join(working_dir, 'cbr')
 final_dir = os.path.join(os.environ['USERPROFILE'], 'OneDrive', 'eComics (cbr,cbz)','Dragon Ball Super ESP')
 
 # Creating working directory
-try:
-    if not os.path.exists(working_dir):
-        os.makedirs(working_dir)
-except Exception as e:
-    print(f"The process failed: {e}")
-    exit(1)
+if not os.path.exists(working_dir):
+    os.makedirs(working_dir)
 
 # Creating download directory
-try:
-    if os.path.exists(download_dir_base):
-        shutil.rmtree(download_dir_base)
-    os.makedirs(download_dir_base)
-except Exception as e:
-    print(f"The process failed: {e}")
-    exit(1)
+if os.path.exists(download_dir_base):
+    shutil.rmtree(download_dir_base)
+os.makedirs(download_dir_base)
 
 # Creating cbr directory
-try:
-    if os.path.exists(cbr_dir):
-        shutil.rmtree(cbr_dir)
-    os.makedirs(cbr_dir)
-except Exception as e:
-    print(f"The process failed: {e}")
-    exit(1)
+if os.path.exists(cbr_dir):
+    shutil.rmtree(cbr_dir)
+os.makedirs(cbr_dir)
 
 # Creating final directory
-try:
-    if not os.path.exists(final_dir):
-        os.makedirs(final_dir)
-except Exception as e:
-    print(f"The process failed: {e}")
-    exit(1)
+if not os.path.exists(final_dir):
+    os.makedirs(final_dir)
     
 try:
     volume = max(starting_volume, 1)
@@ -66,31 +50,42 @@ try:
             url = f"https://radardeldragon.com/dragon-ball-super-manga-{volume}-espanol/"
 
         # Getting HTML
+        print(f"getting html from {url.ljust(15)}")
         response = requests.get(url)
         html = response.text
 
         soup = BeautifulSoup(html, 'html.parser')
 
+        imgs = []
         # Extracting image nodes
-        imgs = soup.select("figure.wp-block-image img")
-        #print(f"[DBG] {imgs}")
         if not imgs:
-            imgs = soup.select("div.entry-content.clear img")
+            try:
+                imgs = soup.select("figure.wp-block-image img")
+            except Exception:
+                imgs = []
 
         if not imgs:
-            print(f"No images found for volume {volume}. Exiting.")
-            break
+            try:
+                imgs = soup.select("div.entry-content.clear img")
+            except Exception:
+                imgs = []
+                
+        if not imgs:
+            raise RuntimeError(f"No images found for volume {volume}. Exiting.")
+
+        #print(f"{imgs}")
 
         # Create image folder
-        try:
-            os.makedirs(downloadDirVol)
-        except Exception as e:
-            print(f"The process failed: {e}")
-            exit(1)
+        os.makedirs(downloadDirVol)
 
         # Download images
         for i, img in enumerate(imgs):
-            img_src = img.get("data-src")
+            
+            if volume <= 58:
+                img_src = img.get("data-src")
+            else:
+                img_src = img.get("src")
+            
             img_name_with_path = os.path.join(downloadDirVol, f"img_{str(i).zfill(3)}.jpeg")
 
             print(f"getting {img_name_with_path.ljust(15)}")
